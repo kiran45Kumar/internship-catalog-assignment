@@ -1,5 +1,5 @@
-const express = require('express');
-const Internship = require('../models/Internship');
+const express = require("express");
+const Internship = require("../models/Internship");
 
 const router = express.Router();
 
@@ -15,7 +15,7 @@ const router = express.Router();
  *   page           - 1-indexed page number, default 1
  *   limit          - page size, default 9
  */
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const {
       q,
@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
     const clauses = [];
 
     if (q && q.trim()) {
-      const rx = new RegExp(q.trim(), 'i');
+      const rx = new RegExp(q.trim(), "i");
       clauses.push({
         $or: [{ title: rx }, { company: rx }, { description: rx }],
       });
@@ -55,25 +55,31 @@ router.get('/', async (req, res) => {
     // Combine the clauses. If multiple filters are selected, results should
     // match all of them.
     // Apply all selected filters together.
-      const filter = clauses.length ? { $and: clauses } : {};
+    const filter = clauses.length ? { $and: clauses } : {};
 
-      // Pagination
-      const pageNum = Math.max(1, parseInt(page, 10) || 1);
-      const limitNum = Math.max(1, parseInt(limit, 10) || 9);
+    // Pagination
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.max(1, parseInt(limit, 10) || 9);
 
-      // Page 1 -> skip 0
-      // Page 2 -> skip 9
-      // Page 3 -> skip 18
-      const skip = (pageNum - 1) * limitNum;
+    // Page 1 -> skip 0
+    // Page 2 -> skip 9
+    // Page 3 -> skip 18
+    const skip = (pageNum - 1) * limitNum;
 
     const [items, total] = await Promise.all([
-      Internship.find(filter)
-        .sort({ postedAt: -1 })
-        .skip(skip)
-        .limit(limitNum),
+     Internship.find(filter)
+  .sort({ postedAt: -1, _id: -1 })
+  .skip(skip)
+  .limit(limitNum),
       Internship.countDocuments(filter),
     ]);
-
+    console.log(
+      `Page ${pageNum}`,
+      items.map((i) => ({
+        id: i._id.toString(),
+        title: i.title,
+      })),
+    );
     res.json({
       items,
       total,
@@ -82,8 +88,8 @@ router.get('/', async (req, res) => {
       totalPages: Math.ceil(total / limitNum),
     });
   } catch (err) {
-    console.error('[GET /api/internships]', err);
-    res.status(500).json({ error: 'Failed to fetch internships' });
+    console.error("[GET /api/internships]", err);
+    res.status(500).json({ error: "Failed to fetch internships" });
   }
 });
 
@@ -93,31 +99,31 @@ router.get('/', async (req, res) => {
  * Returns the distinct values for filter fields so the sidebar can render
  * checkboxes without hard-coding them.
  */
-router.get('/facets', async (_req, res) => {
+router.get("/facets", async (_req, res) => {
   try {
     const [domains, workModes, locations] = await Promise.all([
-      Internship.distinct('domain'),
-      Internship.distinct('workMode'),
-      Internship.distinct('location'),
+      Internship.distinct("domain"),
+      Internship.distinct("workMode"),
+      Internship.distinct("location"),
     ]);
     res.json({ domains, workModes, locations });
   } catch (err) {
-    console.error('[GET /api/internships/facets]', err);
-    res.status(500).json({ error: 'Failed to fetch facets' });
+    console.error("[GET /api/internships/facets]", err);
+    res.status(500).json({ error: "Failed to fetch facets" });
   }
 });
 
 /**
  * GET /api/internships/:id
  */
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const internship = await Internship.findById(req.params.id);
-    if (!internship) return res.status(404).json({ error: 'Not found' });
+    if (!internship) return res.status(404).json({ error: "Not found" });
     res.json(internship);
   } catch (err) {
-    console.error('[GET /api/internships/:id]', err);
-    res.status(500).json({ error: 'Failed to fetch internship' });
+    console.error("[GET /api/internships/:id]", err);
+    res.status(500).json({ error: "Failed to fetch internship" });
   }
 });
 
