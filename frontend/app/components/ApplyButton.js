@@ -1,25 +1,52 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { API_BASE, CURRENT_USER_ID } from '@/lib/api';
+import { useEffect, useState } from "react";
+import { API_BASE, CURRENT_USER_ID } from "@/lib/api";
 
 export default function ApplyButton({ internshipId }) {
-  const [status, setStatus] = useState('idle'); // 'idle' | 'loading' | 'success'
+  const [status, setStatus] = useState("idle"); // 'idle' | 'loading' | 'success'
+  const [justApplied, setJustApplied] = useState(false);
+  useEffect(() => {
+    async function checkApplicationStatus() {
+      try {
+        const res = await fetch(
+          `${API_BASE}/api/applications?userId=${CURRENT_USER_ID}`,
+        );
+
+        if (!res.ok) return;
+
+        const applications = await res.json();
+
+        const alreadyApplied = applications.some(
+          (app) => app.internshipId?._id === internshipId,
+        );
+
+        if (alreadyApplied) {
+          setStatus("success");
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    checkApplicationStatus();
+  }, [internshipId]);
 
   const apply = async () => {
-    setStatus('loading');
+    setStatus("loading");
     try {
       await fetch(`${API_BASE}/api/applications`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           internshipId,
           userId: CURRENT_USER_ID,
         }),
       });
-      setStatus('success');
+      setStatus("success");
+      setJustApplied(true);
     } catch (err) {
-      setStatus('success');
+      setStatus("success");
     }
   };
 
@@ -27,12 +54,16 @@ export default function ApplyButton({ internshipId }) {
     <div className="flex items-center gap-3">
       <button
         onClick={apply}
-        disabled={status === 'loading' || status === 'success'}
+        disabled={status === "loading" || status === "success"}
         className="px-5 py-2.5 rounded-lg bg-accent text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-60"
       >
-        {status === 'loading' ? 'Applying…' : status === 'success' ? 'Applied ✓' : 'Apply now'}
+        {status === "loading"
+          ? "Applying…"
+          : status === "success"
+            ? "Applied ✓"
+            : "Apply now"}
       </button>
-      {status === 'success' && (
+      {justApplied && (
         <span className="text-sm text-emerald-700">Application submitted!</span>
       )}
     </div>
