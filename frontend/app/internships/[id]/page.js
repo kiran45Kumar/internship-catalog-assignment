@@ -1,17 +1,18 @@
-import { API_BASE } from '@/lib/api';
-import ApplyButton from '../../components/ApplyButton';
-import Link from 'next/link';
-
+import { API_BASE } from "@/lib/api";
+import ApplyButton from "../../components/ApplyButton";
+import Link from "next/link";
+import SaveButton from "../../components/SaveButton";
 async function getInternship(id) {
-  const res = await fetch(`${API_BASE}/api/internships/${id}`, { cache: 'no-store' });
+  const res = await fetch(`${API_BASE}/api/internships/${id}`, {
+    cache: "no-store",
+  });
   if (!res.ok) return null;
   return res.json();
 }
 
 function formatStipend(value) {
-  return `₹${value.toLocaleString('en-IN')}/mo`;
+  return `₹${value.toLocaleString("en-IN")}/mo`;
 }
-
 
 export default async function InternshipDetailPage({ params }) {
   const { id } = await params;
@@ -78,8 +79,9 @@ export default async function InternshipDetailPage({ params }) {
         )}
       </section>
 
-      <div className="mt-6">
+      <div className="mt-6 flex items-center gap-3">
         <ApplyButton internshipId={internship._id} />
+        <SaveButton internshipId={internship._id} />
       </div>
     </article>
   );
