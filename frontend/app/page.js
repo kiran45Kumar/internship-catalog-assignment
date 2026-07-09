@@ -1,33 +1,47 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useState } from 'react';
-import { buildUrl } from '@/lib/api';
-import InternshipCard from './components/InternshipCard';
-import FilterSidebar from './components/FilterSidebar';
-import SearchBar from './components/SearchBar';
+import { useCallback, useEffect, useState } from "react";
+import { buildUrl, CURRENT_USER_ID } from "@/lib/api";
+import InternshipCard from "./components/InternshipCard";
+import FilterSidebar from "./components/FilterSidebar";
+import SearchBar from "./components/SearchBar";
 
 const PAGE_SIZE = 9;
 
 export default function HomePage() {
-  const [facets, setFacets] = useState({ domains: [], workModes: [], locations: [] });
+  const [facets, setFacets] = useState({
+    domains: [],
+    workModes: [],
+    locations: [],
+  });
   const [filters, setFilters] = useState({
-    q: '',
+    q: "",
     domain: [],
     workMode: [],
     location: [],
-    minStipend: '',
+    minStipend: "",
   });
   const [page, setPage] = useState(1);
 
   const [data, setData] = useState({ items: [], total: 0, totalPages: 1 });
+  const [appliedIds, setAppliedIds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // Load facets once.
   useEffect(() => {
-    fetch(buildUrl('/api/internships/facets'))
+    fetch(buildUrl("/api/internships/facets"))
       .then((r) => r.json())
       .then(setFacets)
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch(buildUrl("/api/applications", { userId: CURRENT_USER_ID }))
+      .then((r) => r.json())
+      .then((apps) => {
+        setAppliedIds(apps.map((app) => app.internshipId._id));
+      })
       .catch(() => {});
   }, []);
 
@@ -36,7 +50,7 @@ export default function HomePage() {
     setLoading(true);
     setError(null);
     fetch(
-      buildUrl('/api/internships', {
+      buildUrl("/api/internships", {
         q: filters.q,
         domain: filters.domain,
         workMode: filters.workMode,
@@ -44,7 +58,7 @@ export default function HomePage() {
         minStipend: filters.minStipend,
         page,
         limit: PAGE_SIZE,
-      })
+      }),
     )
       .then((r) => r.json())
       .then((d) => {
@@ -52,7 +66,7 @@ export default function HomePage() {
         setLoading(false);
       })
       .catch((err) => {
-        setError('Failed to load internships');
+        setError("Failed to load internships");
         setLoading(false);
       });
   }, [filters, page]);
@@ -83,14 +97,17 @@ export default function HomePage() {
             Browse internships
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            {data.total} opportunit{data.total === 1 ? 'y' : 'ies'} matching your filters
+            {data.total} opportunit{data.total === 1 ? "y" : "ies"} matching
+            your filters
           </p>
         </div>
 
         <SearchBar onSearch={handleSearch} />
 
         {error && (
-          <div className="rounded-md bg-red-50 text-red-700 text-sm p-3">{error}</div>
+          <div className="rounded-md bg-red-50 text-red-700 text-sm p-3">
+            {error}
+          </div>
         )}
 
         {loading ? (
@@ -102,7 +119,11 @@ export default function HomePage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {data.items.map((i) => (
-              <InternshipCard key={i._id} internship={i} />
+              <InternshipCard
+                key={i._id}
+                internship={i}
+                applied={appliedIds.includes(i._id)}
+              />
             ))}
           </div>
         )}

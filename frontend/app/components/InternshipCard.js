@@ -1,10 +1,10 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 function formatStipend(value) {
-  return `₹${value.toLocaleString('en-IN')}/mo`;
+  return `₹${value.toLocaleString("en-IN")}/mo`;
 }
 
-export default function InternshipCard({ internship }) {
+export default function InternshipCard({ internship, applied }) {
   return (
     <Link
       href={`/internships/${internship._id}`}
@@ -12,7 +12,9 @@ export default function InternshipCard({ internship }) {
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="font-semibold text-ink leading-tight">{internship.title}</h3>
+          <h3 className="font-semibold text-ink leading-tight">
+            {internship.title}
+          </h3>
           <p className="text-sm text-slate-500 mt-0.5">{internship.company}</p>
         </div>
         <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 whitespace-nowrap">
@@ -26,6 +28,17 @@ export default function InternshipCard({ internship }) {
         <span>💰 {formatStipend(internship.stipendPerMonth)}</span>
       </div>
 
+      <div className="mt-4 flex items-center justify-between">
+        <span className="text-xs font-medium text-slate-500">
+          {internship.domain}
+        </span>
+
+        {applied && (
+          <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">
+            ✓ Applied
+          </span>
+        )}
+      </div>
       {internship.skills?.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-1.5">
           {internship.skills.slice(0, 4).map((s) => (
