@@ -54,11 +54,17 @@ router.get('/', async (req, res) => {
 
     // Combine the clauses. If multiple filters are selected, results should
     // match all of them.
-    const filter = clauses.length ? { $or: clauses } : {};
+    // Apply all selected filters together.
+      const filter = clauses.length ? { $and: clauses } : {};
 
-    const pageNum = Math.max(1, parseInt(page, 10) || 1);
-    const limitNum = Math.max(1, parseInt(limit, 10) || 9);
-    const skip = pageNum * limitNum;
+      // Pagination
+      const pageNum = Math.max(1, parseInt(page, 10) || 1);
+      const limitNum = Math.max(1, parseInt(limit, 10) || 9);
+
+      // Page 1 -> skip 0
+      // Page 2 -> skip 9
+      // Page 3 -> skip 18
+      const skip = (pageNum - 1) * limitNum;
 
     const [items, total] = await Promise.all([
       Internship.find(filter)
