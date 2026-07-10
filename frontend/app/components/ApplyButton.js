@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { API_BASE, CURRENT_USER_ID } from "@/lib/api";
+import { toast, Toaster } from "sonner";
 
 export default function ApplyButton({ internshipId }) {
   const [status, setStatus] = useState("idle"); // 'idle' | 'loading' | 'success'
@@ -44,14 +45,17 @@ export default function ApplyButton({ internshipId }) {
         }),
       });
       setStatus("success");
+      toast.success("Application submitted successfully!");
       setJustApplied(true);
     } catch (err) {
+      toast.error("Failed to apply for the internship.");
       setStatus("success");
     }
   };
 
   return (
     <div className="flex items-center gap-3">
+      <Toaster position="top-right" richColors />
       <button
         onClick={apply}
         disabled={status === "loading" || status === "success"}
@@ -63,9 +67,9 @@ export default function ApplyButton({ internshipId }) {
             ? "Applied ✓"
             : "Apply now"}
       </button>
-      {justApplied && (
+      {/* {justApplied && (
         <span className="text-sm text-emerald-700">Application submitted!</span>
-      )}
+      )} */}
     </div>
   );
 }

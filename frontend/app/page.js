@@ -28,7 +28,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Load facets once.
+
   useEffect(() => {
     fetch(buildUrl("/api/internships/facets"))
       .then((r) => r.json())
@@ -45,7 +45,7 @@ export default function HomePage() {
       .catch(() => {});
   }, []);
 
-  // Fetch internships whenever filters or page change.
+
   useEffect(() => {
     setLoading(true);
     setError(null);

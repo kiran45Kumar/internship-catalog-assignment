@@ -6,8 +6,6 @@ import { API_BASE, CURRENT_USER_ID } from '@/lib/api';
 export default function SaveButton({ internshipId }) {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  // Check whether already bookmarked
   useEffect(() => {
     fetch(
       `${API_BASE}/api/bookmarks?userId=${CURRENT_USER_ID}`
